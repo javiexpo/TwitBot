@@ -1,13 +1,15 @@
 //cargamos el modulo dotenv y lo configuramos para que use nuestras crendenciales
 var credentialFile = '';
 var indexCounterInitAt = 0;
+var workingHours = 0;
 if (process.argv.length < 3) {
     console.log('ERROR: Por favor indique el fichero con las credenciales')
     process.exit(1);
 } else {
     credentialFile = process.argv[2];
     indexCounterInitAt = process.argv[3] || 0;
-    console.log('indexCounterInitAt = ' + indexCounterInitAt);
+    workingHours = 60 * 60 * process.argv[4] || 10;
+    console.log('credentialFile=' + credentialFile + ' indexCounterInitAt=' + indexCounterInitAt + ' and workingHoursInSeconds=' + workingHours);
 }
 
 require('dotenv').config({path: credentialFile});
@@ -16,8 +18,6 @@ Twit = require('twit');
 
 TWEETS_DB_FILE = 'tweetsDB.txt';
 //TWEETS_DB_FILE = 'tweetsDB_TEST.txt';
-HOURS_10 = 60 * 60 * 10 * 1000.
-
 
 //Definimos un objeto JSON con las credenciales de nuestra Twiiter App las cuales son necesarias 
 //para que el modulo Twit pueda trabajar
@@ -48,8 +48,8 @@ function readTweetsFile() {
       lineReader.on('close', function(evt){
           console.log('Number of Tweets read ' + tweetsDB.length);
           var nTweetsToPost = tweetsDB.length - indexCounter;
-          var interval = HOURS_10 / nTweetsToPost;
-          console.log(nTweetsToPost + ' Tweets to be posted very ' + interval / 1000 + ' seconds' );
+          var interval = workingHours / nTweetsToPost;
+          console.log(nTweetsToPost + ' Tweets to be posted every ' + interval + ' seconds' );
           startScheduleForTweets(interval);
       });
 }
