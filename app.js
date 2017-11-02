@@ -3,12 +3,19 @@ var credentialFile = '';
 var indexCounterInitAt = 0;
 var workingHours = 0;
 if (process.argv.length < 3) {
-    console.log('ERROR: Por favor indique el fichero con las credenciales')
-    process.exit(1);
+    console.log('ERROR: Faltan parámetros');
+    process.exit(0);
 } else {
-    credentialFile = process.argv[2];
-    indexCounterInitAt = process.argv[3] || 0;
-    workingHours = 60 * 60 * process.argv[4] || 10;
+    credentialFile = process.argv[2];                       //El 2do parametro representa el fichero con las credenciales de Twitter
+    indexCounterInitAt = process.argv[3] || 0;              //El 3er parametro representa el indice a partir del cual empezar a publicar tweets
+    workingHours = 60 * 60 * process.argv[4] || 10;         //El 4to parametro representa la cantidad de horas que durante las cuales se distribuyen los tweets
+    if(process.argv[5] != undefined) {
+        tweetDBfile = process.argv[5];         //El 4to parametro representa la cantidad de horas que durante las cuales se distribuyen los tweets
+    } else {
+        console.log('ERROR: Falta indicar la ruta al fichero con tweets a publicar');
+        process.exit(0);
+    }
+    
     console.log('credentialFile=' + credentialFile + ' indexCounterInitAt=' + indexCounterInitAt + ' and workingHoursInSeconds=' + workingHours);
 }
 
@@ -16,7 +23,7 @@ require('dotenv').config({path: credentialFile});
 fs = require('fs')
 Twit = require('twit');
 
-TWEETS_DB_FILE = 'tweetsDB.txt';
+TWEETS_DB_FILE = tweetDBfile;
 //TWEETS_DB_FILE = 'tweetsDB_TEST.txt';
 
 //Definimos un objeto JSON con las credenciales de nuestra Twiiter App las cuales son necesarias 
@@ -76,12 +83,6 @@ function startScheduleForTweets(interval) {
 
 //Definimos una función que sea capaz de Publciar un Tweet 
 function tweetScheduler(){
-    if(indexCounter >= tweetsDB.length ){
-        console.log('Reiniciamos indexCounter')
-        indexCounter = indexCounterInitAt;
-        console.log('Proceso finalizado!');
-        process.exit(1);
-    }
     var status = tweetsDB[indexCounter];
     var tweet = { status: status };
     T.post('statuses/update', tweet, tweeted);
@@ -91,6 +92,11 @@ function tweetScheduler(){
         }else{
             console.log('Voila It worked!');
             indexCounter++;
+        }
+
+        if(indexCounter >= tweetsDB.length ){
+            console.log('Proceso finalizado!');
+            process.exit(0);
         }
     }
 }
